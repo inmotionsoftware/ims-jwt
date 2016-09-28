@@ -1,0 +1,16 @@
+{
+  "name": "ims-jwt",
+  "version": "0.1.0",
+  "description": "Javascript Web Token Implementation",
+  "main": "index.js",
+  "scripts": {
+    "test": "test.js"
+  },
+  "author": "Brian Howard",
+  "license": "MIT",
+  "dependencies": {
+    "base64url": "^2.0.0",
+    "ms": "^0.7.1",
+    "node-uuid": "^1.4.7"
+  }
+}
