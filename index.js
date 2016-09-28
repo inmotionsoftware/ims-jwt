@@ -4,21 +4,16 @@ let util = require('util');
 let crypto = require('crypto');
 let fs = require('fs');
 
+let base64url = require('base64-url');
 let uuid = require('node-uuid');
 let ecdsa = require('ecdsa-sig-formatter');
 var ms = require('ms');
 
 /**
-*/
-let base64url = {
-  unescape: function(str) {
-    return (str + '==='.slice((str.length + 3) % 4)).replace(/\-/g, '+').replace(/_/g, '/');
-  },
-
-  escape: function(str) {
-    return str.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-  }
-};
+ */
+function logd() {
+  // console.log.apply(this, arguments);
+}
 
 class JWTError extends Error {
   constructor(message) {
@@ -26,12 +21,6 @@ class JWTError extends Error {
     this.message = message;
     this.name = 'JWTError';
   }
-}
-
-/**
- */
-function logd() {
-  // console.log.apply(this, arguments);
 }
 
 /**
@@ -218,16 +207,12 @@ class JwtSign {
       alg: alg
     };
 
-    function combine(header, payload) {
-      let b64url = str => base64url.encode(new Buffer(str).toString('base64'));
-      let h = JSON.stringify(header);
-      let p = JSON.stringify(payload);
-      return `${b64url(h)}.${b64url(p)}`;
-    }
+    let h = JSON.stringify(header);
+    let b = JSON.stringify(this);
 
-    let content = combine(header, this);
+    let content = `${base64url.encode(h)}.${base64url.encode(b)}`;
     let b64 = sign(content, certOrKey, alg);
-    return `${content}.${base64url.encode(b64)}`;
+    return `${content}.${base64url.escape(b64)}`;
   }
 
   /**
@@ -282,7 +267,7 @@ class JwtVerify {
     let algo = this.header.alg;
     assert(algo, `invalid algo: ${algo}`);
 
-    let sig = base64url.decode(this.sig);
+    let sig = base64url.unescape(this.sig);
     assert(sig, `token signature is missing: ${sig}`);
 
     let suc = verify(body, sig, pubkey, algo);
